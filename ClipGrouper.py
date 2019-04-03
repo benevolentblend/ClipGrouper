@@ -6,7 +6,7 @@ Due Date:       April 5th, 2019
 Course:         Independent Study
 Professor:      Dr. Frye
 Filename:       CliperGrouper.py
-Purpose:        The program will look in the videofile directory for mp4 or mov files,
+Purpose:        The program will look in the directory passed for mp4 or mov files,
                 then use mediainfo to lookup and store the information about the video
                 files. Once sorted, the program will measure the gaps between the videos
                 and display an estimate for how the video clips should be grouped.
@@ -17,31 +17,36 @@ import datetime
 import argparse
 from videoInfo import VideoInfo
 
-parser = argparse.ArgumentParser(description="Groups related video files in a directory based off the gaps inbetween.")
+# Usuage funtion and arugment parser
+parser = argparse.ArgumentParser(description="Groups related video files (mov or mp4) in a directory based off the gaps in between.")
 parser.add_argument("directory", help="directory with video files")
 parser.parse_args()
 args = parser.parse_args()
 
 directory = args.directory
 
+if not os.path.isdir(directory):
+    quit("The directory '" + directory + "' does not exist.")
+
 if not directory.endswith("/"):
     directory = directory + "/"
+
 
 videoFiles = []
 gaps = []
 gapsum = datetime.timedelta()
 
+# Loop though files in directory and store the video info
 for f in os.listdir(directory):
     if f.lower().endswith('.mp4') or f.lower().endswith('.mov'):
         file = VideoInfo(directory + f)
         videoFiles.append(file)
 
+if len(videoFiles) < 1:
+    quit('No video files in the directory')
+
 # sort the files by their start value
 sortedFiles = sorted(videoFiles, key=lambda vf: vf.start)
-
-for file in sortedFiles:
-    print file.filename + "," + str(file.start.strftime("%H:%M:%S")) + "," + str(file.duration)
-
 
 # itterate with i over sortedFiles except for last file
 for i, file1 in enumerate(sortedFiles[:-1]):
